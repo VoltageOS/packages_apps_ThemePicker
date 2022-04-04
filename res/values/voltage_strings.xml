@@ -29,5 +29,15 @@
     <string name="wallpaper_color_title">Wallpaper color</string>
     <string name="preset_color_tab">Basic colors</string>
     <string name="color_changed">Color changed</string>
+
+    <string name="monet_color_section_title">System colors customization</string>
+    <string name="monet_color_title">Customize system colors</string>
+    <string name="monet_color_section_description">Advanced customization options for the system theme engine.</string>
+    <string name="monet_accurate_shades_title">Accurate shades</string>
+    <string name="monet_accurate_shades_summary">Use accurate shades</string>
+    <string name="monet_linear_lightness_title">Linear lightness</string>
+    <string name="monet_linear_lightness_summary">Use a linear lightness scale</string>
+    <string name="monet_chroma_factor_title">Chroma</string>
+
 </resources>
 

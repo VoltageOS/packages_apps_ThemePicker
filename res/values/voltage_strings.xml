@@ -23,5 +23,11 @@
     <!-- Font's section -->
     <string name="font_title">System Fonts</string>
     <string name="font_preview_card_content_description">Font Preview</string>
+
+     <!-- Color section -->
+    <string name="wallpaper_color_tab">Wallpaper colors</string>
+    <string name="wallpaper_color_title">Wallpaper color</string>
+    <string name="preset_color_tab">Basic colors</string>
+    <string name="color_changed">Color changed</string>
 </resources>
 

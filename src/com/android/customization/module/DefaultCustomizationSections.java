@@ -32,46 +32,43 @@ import java.util.List;
 /** {@link CustomizationSections} for the customization picker. */
 public final class DefaultCustomizationSections implements CustomizationSections {
 
-    @Override
-    public List<CustomizationSectionController<?>> getAllSectionControllers(Activity activity,
-            LifecycleOwner lifecycleOwner, WallpaperColorsViewModel wallpaperColorsViewModel,
-            WorkspaceViewModel workspaceViewModel, PermissionRequester permissionRequester,
-            WallpaperPreviewNavigator wallpaperPreviewNavigator,
-            CustomizationSectionNavigationController sectionNavigationController,
-            @Nullable Bundle savedInstanceState) {
-        List<CustomizationSectionController<?>> sectionControllers = new ArrayList<>();
+        @Override
+        public List<CustomizationSectionController<?>> getAllSectionControllers(Activity activity,
+                        LifecycleOwner lifecycleOwner, WallpaperColorsViewModel wallpaperColorsViewModel,
+                        WorkspaceViewModel workspaceViewModel, PermissionRequester permissionRequester,
+                        WallpaperPreviewNavigator wallpaperPreviewNavigator,
+                        CustomizationSectionNavigationController sectionNavigationController,
+                        @Nullable Bundle savedInstanceState) {
+                List<CustomizationSectionController<?>> sectionControllers = new ArrayList<>();
 
-        // Wallpaper section.
-        sectionControllers.add(new WallpaperSectionController(
-                activity, lifecycleOwner, permissionRequester, wallpaperColorsViewModel,
-                workspaceViewModel, sectionNavigationController, wallpaperPreviewNavigator,
-                savedInstanceState));
+                // Wallpaper section.
+                sectionControllers.add(new WallpaperSectionController(
+                                activity, lifecycleOwner, permissionRequester, wallpaperColorsViewModel,
+                                workspaceViewModel, sectionNavigationController, wallpaperPreviewNavigator,
+                                savedInstanceState));
 
-        // Dark/Light theme section.
-        sectionControllers.add(new DarkModeSectionController(activity,
-                lifecycleOwner.getLifecycle()));
+                // Dark/Light theme section.
+                sectionControllers.add(new DarkModeSectionController(activity,
+                                lifecycleOwner.getLifecycle()));
 
-        // Monet enable/disable section.
-        sectionControllers.add(new MonetModeSectionController(activity,
-                lifecycleOwner.getLifecycle()));
+                // Themed app icon section.
+                sectionControllers.add(new ThemedIconSectionController(
+                                ThemedIconSwitchProvider.getInstance(activity), workspaceViewModel,
+                                savedInstanceState));
 
-        // Themed app icon section.
-        sectionControllers.add(new ThemedIconSectionController(
-                ThemedIconSwitchProvider.getInstance(activity), workspaceViewModel,
-                savedInstanceState));
+                // App grid section.
+                sectionControllers.add(new GridSectionController(
+                                GridOptionsManager.getInstance(activity), sectionNavigationController));
 
-        // App grid section.
-        sectionControllers.add(new GridSectionController(
-                GridOptionsManager.getInstance(activity), sectionNavigationController));
+                // Icon pack selection section.
+                sectionControllers.add(new IconPackSectionController(
+                                IconPackManager.getInstance(activity, new OverlayManagerCompat(activity)),
+                                sectionNavigationController));
 
-        // Icon pack selection section.
-        sectionControllers.add(new IconPackSectionController(
-                IconPackManager.getInstance(activity, new OverlayManagerCompat(activity)), sectionNavigationController));
-
-        // Font selection section.
-        sectionControllers.add(new FontSectionController(
-                FontManager.getInstance(activity, new OverlayManagerCompat(activity)), sectionNavigationController))
-;
-        return sectionControllers;
-    }
+                // Font selection section.
+                sectionControllers.add(new FontSectionController(
+                                FontManager.getInstance(activity, new OverlayManagerCompat(activity)),
+                                sectionNavigationController));
+                return sectionControllers;
+        }
 }

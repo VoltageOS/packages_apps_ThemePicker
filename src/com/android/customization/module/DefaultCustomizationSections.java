@@ -142,6 +142,12 @@ public final class DefaultCustomizationSections implements CustomizationSections
         sectionControllers.add(new DarkModeSectionController(activity,
                 lifecycleOwner.getLifecycle()));
 
+        // Lock screen quick affordances section.
+        sectionControllers.add(new KeyguardQuickAffordanceSectionController(
+                sectionNavigationController, mKeyguardQuickAffordancePickerInteractor,
+                new ViewModelProvider(activity, mKeyguardQuickAffordancePickerViewModelFactory)
+                .get(KeyguardQuickAffordancePickerViewModel.class), lifecycleOwner));
+
         // Themed app icon section.
         sectionControllers.add(new ThemedIconSectionController(
                 ThemedIconSwitchProvider.getInstance(activity), workspaceViewModel,

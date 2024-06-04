@@ -212,4 +212,8 @@
     <!-- Shared dimensions for Material 3 sliders -->
     <dimen name="slider_track_height">24dp</dimen>
     <dimen name="slider_thumb_height">36dp</dimen>
+
+    <!-- preview page -->
+    <dimen name="preview_page_top_margin">16dp</dimen>
+    <dimen name="preview_page_bottom_margin">16dp</dimen>
 </resources>

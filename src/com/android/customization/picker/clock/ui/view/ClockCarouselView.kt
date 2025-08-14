@@ -126,7 +126,11 @@ class ClockCarouselView(context: Context, attrs: AttributeSet) : FrameLayout(con
     }
 
     fun getContentDescription(index: Int): String {
-        return adapter.getContentDescription(index, resources)
+        return if (::adapter.isInitialized) {
+            adapter.getContentDescription(index, resources)
+        } else {
+            context.getString(R.string.custom_clocks_label)
+        }
     }
 
     fun setUpClockCarouselView(

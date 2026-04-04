@@ -22,4 +22,7 @@ enum class ColorType {
 
     /** Preset colors */
     PRESET_COLOR,
+
+    /** VoltageOS colors */
+    VOLTAGEOS_COLOR,
 }

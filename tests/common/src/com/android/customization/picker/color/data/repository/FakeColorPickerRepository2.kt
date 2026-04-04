@@ -41,6 +41,7 @@ class FakeColorPickerRepository2 @Inject constructor() : ColorPickerRepository2 
             mapOf<ColorType, List<ColorOption>>(
                 ColorType.WALLPAPER_COLOR to listOf(),
                 ColorType.PRESET_COLOR to listOf(),
+                ColorType.VOLTAGEOS_COLOR to listOf(),
             )
         )
     override val colorOptions: StateFlow<Map<ColorType, List<ColorOption>>> =
@@ -53,6 +54,22 @@ class FakeColorPickerRepository2 @Inject constructor() : ColorPickerRepository2 
     fun setOptions(
         wallpaperOptions: List<ColorOptionImpl>,
         presetOptions: List<ColorOptionImpl>,
+        selectedColorOptionType: ColorType,
+        selectedColorOptionIndex: Int,
+    ) {
+        setOptions(
+            wallpaperOptions = wallpaperOptions,
+            presetOptions = presetOptions,
+            voltageOSOptions = listOf(),
+            selectedColorOptionType = selectedColorOptionType,
+            selectedColorOptionIndex = selectedColorOptionIndex,
+        )
+    }
+
+    fun setOptions(
+        wallpaperOptions: List<ColorOptionImpl>,
+        presetOptions: List<ColorOptionImpl>,
+        voltageOSOptions: List<ColorOptionImpl> = listOf(),
         selectedColorOptionType: ColorType,
         selectedColorOptionIndex: Int,
     ) {
@@ -82,12 +99,40 @@ class FakeColorPickerRepository2 @Inject constructor() : ColorPickerRepository2 
                             add(colorOption)
                         }
                     },
+                ColorType.VOLTAGEOS_COLOR to
+                    buildList {
+                        for ((index, colorOption) in voltageOSOptions.withIndex()) {
+                            val isSelected =
+                                selectedColorOptionType == ColorType.VOLTAGEOS_COLOR &&
+                                    selectedColorOptionIndex == index
+                            if (isSelected) {
+                                _selectedColorOption.value = colorOption
+                            }
+                            add(colorOption)
+                        }
+                    },
             )
     }
 
     fun setOptions(
         numWallpaperOptions: Int,
         numPresetOptions: Int,
+        selectedColorOptionType: ColorType,
+        selectedColorOptionIndex: Int,
+    ) {
+        setOptions(
+            numWallpaperOptions = numWallpaperOptions,
+            numPresetOptions = numPresetOptions,
+            numVoltageOSOptions = 0,
+            selectedColorOptionType = selectedColorOptionType,
+            selectedColorOptionIndex = selectedColorOptionIndex,
+        )
+    }
+
+    fun setOptions(
+        numWallpaperOptions: Int,
+        numPresetOptions: Int,
+        numVoltageOSOptions: Int = 0,
         selectedColorOptionType: ColorType,
         selectedColorOptionIndex: Int,
     ) {
@@ -113,6 +158,19 @@ class FakeColorPickerRepository2 @Inject constructor() : ColorPickerRepository2 
                                 selectedColorOptionType == ColorType.PRESET_COLOR &&
                                     selectedColorOptionIndex == index
                             val colorOption = buildPresetOption(index)
+                            if (isSelected) {
+                                _selectedColorOption.value = colorOption
+                            }
+                            add(colorOption)
+                        }
+                    },
+                ColorType.VOLTAGEOS_COLOR to
+                    buildList {
+                        repeat(times = numVoltageOSOptions) { index ->
+                            val isSelected =
+                                selectedColorOptionType == ColorType.VOLTAGEOS_COLOR &&
+                                    selectedColorOptionIndex == index
+                            val colorOption = buildVoltageOSOption(index)
                             if (isSelected) {
                                 _selectedColorOption.value = colorOption
                             }
@@ -155,6 +213,22 @@ class FakeColorPickerRepository2 @Inject constructor() : ColorPickerRepository2 
                 ResourceConstants.OVERLAY_CATEGORY_SYSTEM_PALETTE,
                 toColorString(seedColor),
             )
+        return builder.build()
+    }
+
+    private fun buildVoltageOSOption(index: Int): ColorOptionImpl {
+        val builder = ColorOptionImpl.Builder()
+        builder.lightColors =
+            intArrayOf(Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT)
+        builder.darkColors =
+            intArrayOf(Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT)
+        builder.index = index
+        builder.type = ColorType.VOLTAGEOS_COLOR
+        builder.source = ColorOptionsProvider.COLOR_SOURCE_PRESET
+        builder.title = "VoltageOS"
+        builder
+            .addOverlayPackage("TEST_PACKAGE_TYPE", "voltageos_color")
+            .addOverlayPackage("TEST_PACKAGE_INDEX", "$index")
         return builder.build()
     }
 

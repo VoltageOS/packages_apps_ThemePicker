@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 The VoltageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+
+    <!-- VoltageOS colors -->
+    <color name="voltage_arc_blue">#1E90FF</color>
+    <color name="voltage_plasma_purple">#9D00FF</color>
+    <color name="voltage_ion_green">#39FF14</color>
+    <color name="voltage_surge_orange">#FF5F1F</color>
+    <color name="voltage_neon_red">#FF3131</color>
+    <color name="voltage_cyber_teal">#00FFC6</color>
+    <color name="voltage_high_voltage">#FFFF33</color>
+    <color name="voltage_dark_matter">#0D0D1A</color>
+    <color name="voltage_fusion_pink">#FF3CAC</color>
+    <color name="voltage_quantum_blue">#3A86FF</color>
+    <color name="voltage_toxic_lime">#CCFF00</color>
+    <color name="voltage_storm_indigo">#4B0082</color>
+    <color name="voltage_soft_blue">#4A90E2</color>
+    <color name="voltage_muted_purple">#7B61FF</color>
+    <color name="voltage_slate">#2F4F4F</color>
+</resources>

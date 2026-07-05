@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.constraintlayout.widget.ConstraintSet
@@ -47,6 +48,7 @@ import com.android.customization.picker.color.ui.binder.ColorsFloatingSheetBinde
 import com.android.customization.picker.color.ui.compose.ColorFloatingSheet
 import com.android.customization.picker.color.ui.view.ColorOptionIconView
 import com.android.customization.picker.color.ui.viewmodel.ColorOptionIconViewModel
+import com.android.customization.picker.font.ui.view.FontSectionScreen
 import com.android.customization.picker.grid.ui.binder.GridFloatingSheetBinder
 import com.android.customization.picker.icon.ui.binder.AppIconFloatingSheetBinder
 import com.android.customization.picker.icon.ui.binder.ShapeIconViewBinder
@@ -74,6 +76,7 @@ import com.android.wallpaper.picker.customization.ui.viewmodel.CustomizationOpti
 import com.android.wallpaper.picker.customization.ui.viewmodel.CustomizationPickerViewModel2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -148,6 +151,20 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
 
         val allCustomizationOptionEntries =
             lockScreenCustomizationOptionEntries + homeScreenCustomizationOptionEntries
+        val fontOptionEntries =
+            allCustomizationOptionEntries
+                .filter {
+                    it.first == ThemePickerLockCustomizationOption.FONT ||
+                        it.first == ThemePickerHomeCustomizationOption.FONT
+                }
+                .map { it.second }
+        fontOptionEntries.forEach { entryView ->
+            val layoutParams = entryView.layoutParams as? FlexboxLayout.LayoutParams
+            if (layoutParams != null) {
+                layoutParams.flexBasisPercent = 1.0f
+                entryView.layoutParams = layoutParams
+            }
+        }
         allCustomizationOptionEntries.forEach { (_, view) ->
             ColorUpdateBinder.bind(
                 setColor = { color ->
@@ -201,27 +218,26 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
         if (isKeyguardQuickAffordanceEnabled) {
             optionShortcut =
                 lockScreenCustomizationOptionEntries
-                    .first { it.first == ThemePickerLockCustomizationOption.SHORTCUTS }
-                    .second
-            optionShortcutDescription =
-                optionShortcut.requireViewById(R.id.option_entry_description)
-            optionShortcutIcon1 = optionShortcut.requireViewById(R.id.option_entry_icon_1)
-            optionShortcutIcon2 = optionShortcut.requireViewById(R.id.option_entry_icon_2)
+                    .find { it.first == ThemePickerLockCustomizationOption.SHORTCUTS }
+                    ?.second
+            optionShortcutDescription = optionShortcut?.findViewById(R.id.option_entry_description)
+            optionShortcutIcon1 = optionShortcut?.findViewById(R.id.option_entry_icon_1)
+            optionShortcutIcon2 = optionShortcut?.findViewById(R.id.option_entry_icon_2)
         }
 
-        val optionLockScreenNotificationsSettings: View =
+        val optionLockScreenNotificationsSettings: View? =
             lockScreenCustomizationOptionEntries
-                .first { it.first == ThemePickerLockCustomizationOption.LOCK_SCREEN_NOTIFICATIONS }
-                .second
-        optionLockScreenNotificationsSettings.setOnClickListener {
+                .find { it.first == ThemePickerLockCustomizationOption.LOCK_SCREEN_NOTIFICATIONS }
+                ?.second
+        optionLockScreenNotificationsSettings?.setOnClickListener {
             navigateToLockScreenNotificationsSettingsActivity.invoke()
         }
 
-        val optionMoreLockScreenSettings: View =
+        val optionMoreLockScreenSettings: View? =
             lockScreenCustomizationOptionEntries
-                .first { it.first == ThemePickerLockCustomizationOption.MORE_LOCK_SCREEN_SETTINGS }
-                .second
-        optionMoreLockScreenSettings.setOnClickListener {
+                .find { it.first == ThemePickerLockCustomizationOption.MORE_LOCK_SCREEN_SETTINGS }
+                ?.second
+        optionMoreLockScreenSettings?.setOnClickListener {
             navigateToMoreLockScreenSettingsActivity.invoke()
         }
 
@@ -284,23 +300,26 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
         if (customizationOptionsData.isGridCustomizationAvailable) {
             optionGrid =
                 homeScreenCustomizationOptionEntries
-                    .first { it.first == ThemePickerHomeCustomizationOption.GRID }
-                    .second
-            optionGridDescription = optionGrid.requireViewById(R.id.option_entry_description)
-            optionGridIcon = optionGrid.requireViewById(R.id.option_entry_icon)
+                    .find { it.first == ThemePickerHomeCustomizationOption.GRID }
+                    ?.second
+            optionGridDescription = optionGrid?.findViewById(R.id.option_entry_description)
+            optionGridIcon = optionGrid?.findViewById(R.id.option_entry_icon)
         }
 
-        val optionColorContrast: View =
+        val optionColorContrast: View? =
             homeScreenCustomizationOptionEntries
-                .first { it.first == ThemePickerHomeCustomizationOption.COLOR_CONTRAST }
-                .second
-        optionColorContrast.setOnClickListener { navigateToColorContrastSettingsActivity.invoke() }
+                .find { it.first == ThemePickerHomeCustomizationOption.COLOR_CONTRAST }
+                ?.second
+        optionColorContrast?.setOnClickListener { navigateToColorContrastSettingsActivity.invoke() }
         val backgroundScope =
             CoroutineScope(Dispatchers.IO + Job() + CoroutineName(BACKGROUND_CONTEXT))
 
         ColorUpdateBinder.bind(
             setColor = { color ->
                 optionClockIcon.setColorFilter(color)
+                fontOptionEntries.forEach {
+                    it.findViewById<ImageView>(R.id.option_entry_icon)?.setColorFilter(color)
+                }
                 if (isKeyguardQuickAffordanceEnabled) {
                     optionShortcutIcon1?.setColorFilter(color)
                     optionShortcutIcon2?.setColorFilter(color)
@@ -329,6 +348,23 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
                 launch {
                     optionsViewModel.clockPickerViewModel.selectedClock.collect {
                         optionClockIcon.setImageDrawable(it.thumbnail)
+                    }
+                }
+
+                launch {
+                    optionsViewModel.onCustomizeFontsClicked.collect { clickAction ->
+                        fontOptionEntries.forEach { entryView ->
+                            entryView.setOnClickListener { _ -> clickAction?.invoke() }
+                        }
+                    }
+                }
+
+                launch {
+                    optionsViewModel.fontPickerViewModel.activeOption.collect { option ->
+                        fontOptionEntries.forEach { entryView ->
+                            entryView.findViewById<TextView>(R.id.option_entry_description)?.text =
+                                option?.title
+                        }
                     }
                 }
 
@@ -463,14 +499,16 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
                     optionsViewModel.colorContrastSectionViewModel.contrast.collectLatest { contrast
                         ->
                         binding?.destroy()
-                        binding =
-                            ColorContrastSectionViewBinder2.bind(
-                                view = optionColorContrast,
-                                contrast = contrast,
-                                colorUpdateViewModel = colorUpdateViewModel,
-                                shouldAnimateColor = isOnMainScreen,
-                                lifecycleOwner = lifecycleOwner,
-                            )
+                        optionColorContrast?.let {
+                            binding =
+                                ColorContrastSectionViewBinder2.bind(
+                                    view = it,
+                                    contrast = contrast,
+                                    colorUpdateViewModel = colorUpdateViewModel,
+                                    shouldAnimateColor = isOnMainScreen,
+                                    lifecycleOwner = lifecycleOwner,
+                                )
+                        }
                     }
                 }
 
@@ -742,6 +780,18 @@ constructor(private val defaultCustomizationOptionsBinder: DefaultCustomizationO
                     lifecycleOwner,
                     Dispatchers.IO,
                 )
+            }
+
+        customizationOptionFloatingSheetViewMap
+            ?.get(ThemePickerLockCustomizationOption.FONT)
+            ?.let { view ->
+                (view as ComposeView).setContent {
+                    val isDark = isSystemInDarkTheme()
+                    FontSectionScreen(
+                        viewModel = optionsViewModel.fontPickerViewModel,
+                        isDark = isDark,
+                    )
+                }
             }
 
         customizationOptionFloatingSheetViewMap?.get(ThemePickerHomeCustomizationOption.GRID)?.let {

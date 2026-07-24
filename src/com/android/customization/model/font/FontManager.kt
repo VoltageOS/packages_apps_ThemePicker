@@ -21,64 +21,81 @@ internal constructor(
     private val mProvider: FontOptionProvider,
 ) : CustomizationManager<FontOption> {
 
-    private var mActiveOption: FontOption? = null
-
     override fun isAvailable(): Boolean {
         return overlayManager.isAvailable
     }
 
     override fun apply(option: FontOption, callback: Callback?) {
-        if (!persistOverlay(option)) {
-            Toast.makeText(
-                    mContext,
-                    "Failed to apply font, reboot to try again.",
-                    Toast.LENGTH_SHORT,
-                )
-                .show()
-            callback?.onError(null)
-            return
-        }
+        val userId = UserHandle.myUserId()
+        val previousPackage = getEnabledPackageName()
 
-        val packageName = option.packageName
-        if (packageName == null) {
-            if (mActiveOption?.packageName == null) return
-
-            val overlays =
-                overlayManager.getOverlayPackagesForCategory(
-                    OVERLAY_CATEGORY_FONT,
-                    UserHandle.myUserId(),
-                    ANDROID_PACKAGE,
-                )
-            for (overlay in overlays) {
-                overlayManager.disableOverlay(overlay, UserHandle.myUserId())
+        try {
+            if (previousPackage != option.packageName) {
+                applyOverlay(option.packageName, userId)
             }
-        } else {
-            overlayManager.setEnabledExclusiveInCategory(packageName, UserHandle.myUserId())
-        }
 
-        callback?.onSuccess()
-        mActiveOption = option
+            if (getEnabledPackageName() != option.packageName) {
+                showApplyError(callback, null)
+                return
+            }
+
+            if (!persistOverlay(option)) {
+                restoreOverlay(previousPackage, userId)
+                showApplyError(callback, null)
+                return
+            }
+
+            callback?.onSuccess()
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Failed to apply font ${option.packageName}", e)
+            restoreOverlay(previousPackage, userId)
+            showApplyError(callback, e)
+        }
     }
 
     override fun fetchOptions(callback: OptionsFetchedListener<FontOption>, reload: Boolean) {
-        val options = mProvider.getOptions(reload)
-        for (option in options) {
-            if (isActive(option)) {
-                mActiveOption = option
-                break
-            }
-        }
-        callback.onOptionsLoaded(options)
+        callback.onOptionsLoaded(mProvider.getOptions(reload))
     }
 
     fun isActive(option: FontOption): Boolean {
-        val enabledPkg =
-            overlayManager.getEnabledPackageName(ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT)
-        return if (enabledPkg != null) {
-            enabledPkg == option.packageName
-        } else {
-            option.packageName == null
+        return getEnabledPackageName() == option.packageName
+    }
+
+    private fun getEnabledPackageName(): String? {
+        return overlayManager.getEnabledPackageName(ANDROID_PACKAGE, OVERLAY_CATEGORY_FONT)
+    }
+
+    private fun applyOverlay(packageName: String?, userId: Int) {
+        if (packageName != null) {
+            overlayManager.setEnabledExclusiveInCategory(packageName, userId)
+            return
         }
+
+        overlayManager
+            .getOverlayPackagesForCategory(
+                OVERLAY_CATEGORY_FONT,
+                userId,
+                ANDROID_PACKAGE,
+            )
+            .forEach { overlayManager.disableOverlay(it, userId) }
+    }
+
+    private fun restoreOverlay(packageName: String?, userId: Int) {
+        try {
+            applyOverlay(packageName, userId)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Failed to restore font $packageName", e)
+        }
+    }
+
+    private fun showApplyError(callback: Callback?, throwable: Throwable?) {
+        Toast.makeText(
+                mContext,
+                "Failed to apply font, reboot to try again.",
+                Toast.LENGTH_SHORT,
+            )
+            .show()
+        callback?.onError(throwable)
     }
 
     private fun persistOverlay(toPersist: FontOption): Boolean {

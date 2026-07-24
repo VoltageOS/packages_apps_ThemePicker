@@ -3,6 +3,7 @@ package com.android.customization.picker.font.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.android.customization.model.CustomizationManager.Callback
 import com.android.customization.model.font.FontManager
 import com.android.customization.model.font.FontOption
 import javax.inject.Inject
@@ -46,10 +47,18 @@ class FontPickerViewModel(private val fontManager: FontManager) : ViewModel() {
                 suspend {
                     val option = _selectedOption.value
                     if (option != null) {
-                        fontManager.apply(option, null)
-                        _appliedOption.value = option
-                        _activeOption.value = option
-                        _applyEvent.trySend(Unit)
+                        fontManager.apply(
+                            option,
+                            object : Callback {
+                                override fun onSuccess() {
+                                    _appliedOption.value = option
+                                    _activeOption.value = option
+                                    _applyEvent.trySend(Unit)
+                                }
+
+                                override fun onError(throwable: Throwable?) {}
+                            },
+                        )
                     }
                 }
             } else null

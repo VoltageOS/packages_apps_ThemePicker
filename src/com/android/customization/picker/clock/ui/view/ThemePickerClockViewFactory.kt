@@ -34,6 +34,8 @@ import com.android.wallpaper.util.ScreenSizeCalculator
 import com.android.wallpaper.util.TimeUtils.TimeTicker
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * Provide reusable clock view and related util functions.
@@ -185,7 +187,10 @@ constructor(
      */
     private fun getSmallClockRegion(): VRect {
         val topMargin = getSmallClockTopMargin()
-        val targetHeight = resources.getDimensionPixelSize(clocksR.dimen.small_clock_height)
+        val textSize = resources.getDimensionPixelSize(clocksR.dimen.small_clock_text_size)
+        val configuredHeight =
+            resources.getDimensionPixelSize(clocksR.dimen.small_clock_height)
+        val targetHeight = max(configuredHeight, (textSize * 1.5f).roundToInt())
         return VRect(getSmallClockStartPadding(), topMargin, screenSize.x, topMargin + targetHeight)
     }
 }

@@ -18,13 +18,17 @@ package com.android.wallpaper.customization.ui.binder
 
 import android.view.View.MeasureSpec
 import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.LinearLayout
 import android.widget.Toolbar
 import androidx.core.animation.Animator
 import androidx.core.animation.ValueAnimator
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -77,6 +81,17 @@ constructor(
 
         val toolbar: Toolbar = toolbarContainer.requireViewById(R.id.toolbar)
         val applyButton: ApplyButton = toolbarContainer.requireViewById(R.id.apply_button)
+        val initialTopMargin =
+            (toolbarContainer.layoutParams as? MarginLayoutParams)?.topMargin ?: 0
+        ViewCompat.setOnApplyWindowInsetsListener(toolbarContainer) { toolbarView, insets ->
+            val statusBarTop =
+                insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            toolbarView.updateLayoutParams<MarginLayoutParams> {
+                topMargin = initialTopMargin + statusBarTop
+            }
+            insets
+        }
+        ViewCompat.requestApplyInsets(toolbarContainer)
 
         if (viewModel !is ThemePickerCustomizationOptionsViewModel) {
             throw IllegalArgumentException(

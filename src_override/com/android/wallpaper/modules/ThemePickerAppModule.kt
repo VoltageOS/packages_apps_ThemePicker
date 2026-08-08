@@ -313,7 +313,9 @@ abstract class ThemePickerAppModule {
         @Provides
         @Singleton
         fun provideFlags(): BaseFlags {
-            return object : BaseFlags() {}
+            return object : BaseFlags() {
+                override fun isHideAppLabelEnabled(): Boolean = false
+            }
         }
 
         @Provides
